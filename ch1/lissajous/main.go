@@ -1,0 +1,54 @@
+// Lissajous generates GIF animations of random Lissajous figures
+// Lissajous 生成随机 Lissajous 图形的 GIF 动画
+package main
+
+import (
+	"image"
+	"image/color"
+	"image/gif"
+	"io"
+	"math"
+	"math/rand"
+	"os"
+)
+
+var palette = []color.Color{color.White, color.Black}
+
+const (
+	whiteIndex = 0 // first color in palette  //调色板中第一种颜色
+	blackIndex = 1 // nex color in palette
+)
+
+func main() {
+	lissajous(os.Stdout)
+}
+
+func lissajous(out io.Writer) {
+	const (
+		cycles  = 5     // 完整的 x 振荡器转数
+		res     = 0.001 // 角分辨率
+		size    = 100   // 图像画布覆盖 [-size..+size]
+		nframes = 64    // 动画帧数
+		delay   = 8     // 以 10 毫秒为单位的帧之间的延迟
+	)
+
+	freq := rand.Float64() * 3.0 // y 振荡器的相对频率
+	anim := gif.GIF{LoopCount: nframes}
+	phase := 0.0 //  相位差
+	for i := 0; i < nframes; i++ {
+		rect := image.Rect(0, 0, 2*size+1, 2*size+1)
+		img := image.NewPaletted(rect, palette)
+		for t := 0.0; t < cycles*2*math.Pi; t += res {
+			x := math.Sin(t)
+			y := math.Sin(t*freq + phase)
+			img.SetColorIndex(size+int(x*size+0.5), size+int(y*size+0.5),
+				blackIndex)
+
+		}
+		phase += 0.1
+		anim.Delay = append(anim.Delay, delay)
+		anim.Image = append(anim.Image, img)
+	}
+	gif.EncodeAll(out, &anim) // NOTE: ignoring encoding errors
+
+}
