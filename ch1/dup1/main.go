@@ -7,6 +7,7 @@ import (
 )
 
 // once in the standard input,preceded by its count.
+//一次在标准输入中，前面是它的计数。
 func main() {
 	counts := make(map[string]int)
 	input := bufio.NewScanner(os.Stdin)
